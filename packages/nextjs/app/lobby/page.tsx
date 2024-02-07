@@ -1,11 +1,33 @@
 "use client";
 
+import { GameItem } from "./_components/GameItem";
 import type { NextPage } from "next";
+import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
 const Lobby: NextPage = () => {
+  const { data: getMatches } = useScaffoldContractRead({
+    contractName: "InfernoRoll",
+    functionName: "getMatches",
+  });
+
+  const { writeAsync: createMatch } = useScaffoldContractWrite({
+    contractName: "InfernoRoll",
+    functionName: "createMatch",
+    onBlockConfirmation: txnReceipt => {
+      console.log("📦 Transaction blockHash", txnReceipt.blockHash);
+      console.log(txnReceipt);
+    },
+  });
+
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-2xl mt-10 mb-0">Join a Game</h2>
+      <button
+        className="py-2 px-16 bg-green-500 rounded baseline hover:bg-green-300 disabled:opacity-50"
+        onClick={() => createMatch()}
+      >
+        Create Match
+      </button>
       <div className="flex justify-center px-4 md:px-0 mt-5">
         <div className="overflow-x-auto w-full shadow-2xl rounded-xl">
           <table className="table text-xl bg-base-100 table-zebra w-full md:table-md table-sm">
@@ -19,22 +41,9 @@ const Lobby: NextPage = () => {
               </tr>
             </thead>
             <tbody>
-              <tr className="text-sm">
-                <td className="w-1/12 md:py-4">1</td>
-                <td className="w-3/12 md:py-4">10</td>
-                <td className="w-3/12 md:py-4">1 ETH</td>
-                <td className="w-2/12 md:py-4">
-                  <p>No</p>
-                </td>
-                <td className="w-2/12 md:py-4">
-                  <button
-                    className="py-2 px-16 bg-green-500 rounded baseline hover:bg-green-300 disabled:opacity-50"
-                    onClick={() => console.log("Join")}
-                  >
-                    Join
-                  </button>
-                </td>
-              </tr>
+              {getMatches?.map((m, index) => (
+                <GameItem data={m} key={index} />
+              ))}
             </tbody>
           </table>
         </div>
