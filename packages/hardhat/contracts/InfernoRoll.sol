@@ -22,6 +22,10 @@ contract InfernoRoll {
     return matchList;
   }
 
+  function getMatchByID(uint256 _matchId) public view returns (Match memory){
+    return matchList[_matchId];
+  }
+
   function createMatch() external {
     uint256 newMatchId = numberOfMatches.current();
     matchList.push(Match(newMatchId, 0, 0, false));
