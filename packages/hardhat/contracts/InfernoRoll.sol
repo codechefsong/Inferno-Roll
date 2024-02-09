@@ -15,6 +15,7 @@ contract InfernoRoll {
     uint256 id;
     uint256 numberOfPlayers;
     uint256 prizePool;
+    address[] players;
     bool isFinish;
   }
 
@@ -30,14 +31,25 @@ contract InfernoRoll {
     return matchList[_matchId];
   }
 
+  function checkJoinMatch(uint256 _matchId, address _player) public view returns (bool) {
+    for (uint i = 0; i < matchList[_matchId].players.length; i++) {
+      if (matchList[_matchId].players[i] == _player) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   function createMatch() external {
     uint256 newMatchId = numberOfMatches.current();
-    matchList.push(Match(newMatchId, 0, 0, false));
+    matchList.push(Match(newMatchId, 0, 0, new address[](0), false));
     numberOfMatches.increment();
   }
 
   function joinMatch(uint256 _matchId) external {
     matchList[_matchId].numberOfPlayers += 1;
+    matchList[_matchId].players.push(msg.sender);
   }
 
    function movePlayer() public {
