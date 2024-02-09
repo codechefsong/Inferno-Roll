@@ -9,12 +9,16 @@ contract InfernoRoll {
 
   Match[] public matchList;
 
+  mapping(address => uint256) public playerPosititon;
+
   struct Match {
     uint256 id;
     uint256 numberOfPlayers;
     uint256 prizePool;
     bool isFinish;
   }
+
+  event RollResult(address player, uint256 num);
 
   constructor() {}
 
@@ -34,5 +38,12 @@ contract InfernoRoll {
 
   function joinMatch(uint256 _matchId) external {
     matchList[_matchId].numberOfPlayers += 1;
+  }
+
+   function movePlayer() public {
+    uint256 randomNumber = uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 6;
+    playerPosititon[msg.sender] += randomNumber + 1;
+
+    emit RollResult(msg.sender, randomNumber);
   }
 }
