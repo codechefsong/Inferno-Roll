@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
-const MatchRoom: NextPage = ({ params }: { params: { id: string } }) => {
+const MatchRoom = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
   const { address } = useAccount();
 
@@ -15,15 +14,22 @@ const MatchRoom: NextPage = ({ params }: { params: { id: string } }) => {
     args: [params?.id as any],
   });
 
+  const { data: lavaPosititon } = useScaffoldContractRead({
+    contractName: "InfernoRoll",
+    functionName: "lavaPosititon",
+    args: [params?.id as any],
+  });
+
   const { data: playerPosititon } = useScaffoldContractRead({
     contractName: "InfernoRoll",
-    functionName: "playerPosititon",
-    args: [address],
+    functionName: "getPlayerPosititonByMatchID",
+    args: [params?.id as any, address],
   });
 
   const { writeAsync: movePlayer } = useScaffoldContractWrite({
     contractName: "InfernoRoll",
     functionName: "movePlayer",
+    args: [params?.id as any],
     onBlockConfirmation: txnReceipt => {
       console.log("📦 Transaction blockHash", txnReceipt.blockHash);
       console.log(txnReceipt);
@@ -40,7 +46,8 @@ const MatchRoom: NextPage = ({ params }: { params: { id: string } }) => {
         <p>Players: {matchData?.numberOfPlayers.toString()}</p>
         <p>Prize Pool: {matchData?.prizePool.toString()} ETH</p>
         <p>Is finish: {matchData?.isFinish ? "Yes" : "No"}</p>
-        <p>Positon: {playerPosititon?.toString()}</p>
+        <p>Player Positon: {playerPosititon?.toString()}</p>
+        <p>Lava Positon: {lavaPosititon?.toString()}</p>
         <button
           className="py-2 px-16 mb-1 mt-3 bg-red-400 rounded baseline hover:bg-red-200 disabled:opacity-50"
           onClick={() => movePlayer()}
