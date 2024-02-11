@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Player } from "./_components/Player";
 import { useAccount } from "wagmi";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
@@ -18,12 +19,6 @@ const MatchRoom = ({ params }: { params: { id: string } }) => {
     contractName: "InfernoRoll",
     functionName: "lavaPosititon",
     args: [params?.id as any],
-  });
-
-  const { data: playerPosititon } = useScaffoldContractRead({
-    contractName: "InfernoRoll",
-    functionName: "getPlayerPosititonByMatchID",
-    args: [params?.id as any, address],
   });
 
   const { writeAsync: movePlayer } = useScaffoldContractWrite({
@@ -46,8 +41,10 @@ const MatchRoom = ({ params }: { params: { id: string } }) => {
         <p>Players: {matchData?.numberOfPlayers.toString()}</p>
         <p>Prize Pool: {matchData?.prizePool.toString()} ETH</p>
         <p>Is finish: {matchData?.isFinish ? "Yes" : "No"}</p>
-        <p>Player Positon: {playerPosititon?.toString()}</p>
         <p>Lava Positon: {lavaPosititon?.toString()}</p>
+        {matchData?.players.map(a => (
+          <Player key={a} address={a} matchId={params?.id} />
+        ))}
         <button
           className="py-2 px-16 mb-1 mt-3 bg-red-400 rounded baseline hover:bg-red-200 disabled:opacity-50"
           onClick={() => movePlayer()}
