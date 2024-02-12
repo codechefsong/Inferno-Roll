@@ -21,6 +21,7 @@ contract InfernoRoll {
   }
 
   event RollResult(address player, uint256 num);
+  event PlayerEliminateEvent(address player, uint256 time);
 
   constructor() {}
 
@@ -58,11 +59,33 @@ contract InfernoRoll {
     playerPosititon[_matchId][msg.sender] = lavaPosititon[_matchId] + 20;
   }
 
-   function movePlayer(uint256 _matchId) public {
+  function movePlayer(uint256 _matchId) public {
     uint256 randomNumber = uint256(keccak256(abi.encode(block.timestamp, msg.sender))) % 6;
     playerPosititon[_matchId][msg.sender] += randomNumber + 1;
     lavaPosititon[_matchId] += randomNumber + 1;
 
+    for (uint i = 0; i < matchList[_matchId].numberOfPlayers; i++) {
+      uint256 playerDistance = playerPosititon[_matchId][matchList[_matchId].players[i]];
+      if (lavaPosititon[_matchId] > playerDistance) {
+        emit PlayerEliminateEvent(matchList[_matchId].players[i], block.timestamp);
+        removePlayer(_matchId, i);
+        break;
+      }
+    }
+
     emit RollResult(msg.sender, randomNumber);
+  }
+
+  function removePlayer(uint256 _matchId, uint index) internal {
+    for (uint i = index; i < matchList[_matchId].numberOfPlayers - 1; i++) {
+      matchList[_matchId].players[i] = matchList[_matchId].players[i + 1];
+    }
+
+    matchList[_matchId].players.pop();
+    matchList[_matchId].numberOfPlayers -= 1;
+
+    if (matchList[_matchId].players.length <= 1) {
+      matchList[_matchId].isFinish = true;
+    }
   }
 }
