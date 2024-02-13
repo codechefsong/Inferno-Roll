@@ -41,10 +41,14 @@ const MatchRoom = ({ params }: { params: { id: string } }) => {
         <p>Players: {matchData?.numberOfPlayers.toString()}</p>
         <p>Prize Pool: {matchData?.prizePool.toString()} ETH</p>
         <p>Is finish: {matchData?.isFinish ? "Yes" : "No"}</p>
-        <p>Lava Positon: {lavaPosititon?.toString()}</p>
-        {matchData?.players.map(a => (
-          <Player key={a} address={a} matchId={params?.id} />
-        ))}
+        <div className="flex">
+          <p className="bg-red-600 w-[30px] min-h-[200px] text-white">{lavaPosititon?.toString()}</p>
+          <div className="flex flex-col">
+            {matchData?.players.map(a => (
+              <Player key={a} address={a} matchId={params?.id} lavaPosititon={lavaPosititon?.toString()} />
+            ))}
+          </div>
+        </div>
         <button
           className="py-2 px-16 mb-1 mt-3 bg-red-400 rounded baseline hover:bg-red-200 disabled:opacity-50"
           onClick={() => movePlayer()}
