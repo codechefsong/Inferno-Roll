@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { Player } from "./_components/Player";
 import { useAccount } from "wagmi";
-import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractRead, useScaffoldContractWrite, useScaffoldEventSubscriber } from "~~/hooks/scaffold-eth";
+import { notification } from "~~/utils/scaffold-eth";
 
 const MatchRoom = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
@@ -28,6 +29,15 @@ const MatchRoom = ({ params }: { params: { id: string } }) => {
     onBlockConfirmation: txnReceipt => {
       console.log("📦 Transaction blockHash", txnReceipt.blockHash);
       console.log(txnReceipt);
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "InfernoRoll",
+    eventName: "RollResult",
+    listener: (data: any) => {
+      console.log(data[0].args);
+      notification.success(`You roll ${+data[0].args.num.toString() + 1}`);
     },
   });
 
