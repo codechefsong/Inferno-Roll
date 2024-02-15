@@ -16,6 +16,12 @@ const MatchRoom = ({ params }: { params: { id: string } }) => {
     args: [params?.id as any],
   });
 
+  const { data: isJoined } = useScaffoldContractRead({
+    contractName: "InfernoRoll",
+    functionName: "checkJoinMatch",
+    args: [params?.id as any, address],
+  });
+
   const { data: lavaPosititon } = useScaffoldContractRead({
     contractName: "InfernoRoll",
     functionName: "lavaPosititon",
@@ -32,12 +38,31 @@ const MatchRoom = ({ params }: { params: { id: string } }) => {
     },
   });
 
+  const { writeAsync: joinMatch } = useScaffoldContractWrite({
+    contractName: "InfernoRoll",
+    functionName: "joinMatch",
+    args: [params?.id as any],
+    onBlockConfirmation: txnReceipt => {
+      console.log("📦 Transaction blockHash", txnReceipt.blockHash);
+      console.log(txnReceipt);
+    },
+  });
+
   useScaffoldEventSubscriber({
     contractName: "InfernoRoll",
     eventName: "RollResult",
     listener: (data: any) => {
       console.log(data[0].args);
       notification.success(`You roll ${+data[0].args.num.toString() + 1}`);
+    },
+  });
+
+  useScaffoldEventSubscriber({
+    contractName: "InfernoRoll",
+    eventName: "PlayerEliminateEvent",
+    listener: (data: any) => {
+      console.log(data[0].args);
+      if (data[0].args.player === address) notification.error("You have been Eliminated!");
     },
   });
 
@@ -59,12 +84,21 @@ const MatchRoom = ({ params }: { params: { id: string } }) => {
             ))}
           </div>
         </div>
-        <button
-          className="py-2 px-16 mb-1 mt-3 bg-red-400 rounded baseline hover:bg-red-200 disabled:opacity-50"
-          onClick={() => movePlayer()}
-        >
-          Roll
-        </button>
+        {isJoined ? (
+          <button
+            className="py-2 px-16 mb-1 mt-3 bg-red-400 rounded baseline hover:bg-red-200 disabled:opacity-50"
+            onClick={() => movePlayer()}
+          >
+            Roll
+          </button>
+        ) : (
+          <button
+            className="py-2 px-16 mb-1 mt-3 bg-green-500 rounded baseline hover:bg-greenred-400 disabled:opacity-50"
+            onClick={() => joinMatch()}
+          >
+            Join
+          </button>
+        )}
         <button
           className="py-2 px-16 mb-1 mt-3 bg-gray-300 rounded baseline hover:bg-gray-200 disabled:opacity-50"
           onClick={() => router.push("/lobby")}
