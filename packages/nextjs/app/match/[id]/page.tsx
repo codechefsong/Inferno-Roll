@@ -78,7 +78,7 @@ const MatchRoom = ({ params }: { params: { id: string } }) => {
         <p>Is finish: {matchData?.isFinish ? "Yes" : "No"}</p>
         <div className="flex">
           <p className="bg-red-600 w-[30px] min-h-[200px] text-white">{lavaPosititon?.toString()}</p>
-          <div className="flex flex-col">
+          <div className="flex flex-col bg-orange-100 w-full h-auto">
             {matchData?.players.map(a => (
               <Player key={a} address={a} matchId={params?.id} lavaPosititon={lavaPosititon?.toString()} />
             ))}
